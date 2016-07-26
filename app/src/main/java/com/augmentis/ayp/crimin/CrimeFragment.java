@@ -70,6 +70,7 @@ public class CrimeFragment extends Fragment{
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int after) {
                     crime.setTitle(s.toString());
+                addThisPositionToResult(position);
             }
 
             @Override
@@ -87,13 +88,11 @@ public class CrimeFragment extends Fragment{
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
                 crime.setSolved(isChecked);
+                addThisPositionToResult(position);
                 Log.d(CrimeListFragment.TAG,"Crime" + crime.toString());
             }
         });
 
-        Intent intent = new Intent();
-        intent.putExtra("position",position);
-        getActivity().setResult(Activity.RESULT_OK,intent);
         return v;
     }
 
@@ -101,5 +100,12 @@ public class CrimeFragment extends Fragment{
 
     private String  getFormattedDate(Date date){
         return new SimpleDateFormat("dd MMMM yyyy").format(date);
+    }
+
+    private void addThisPositionToResult(int position){
+        if (getActivity() instanceof  CrimePagerActivity){
+            ((CrimePagerActivity) getActivity()).addPageUpdate(position);
+        }
+
     }
 }

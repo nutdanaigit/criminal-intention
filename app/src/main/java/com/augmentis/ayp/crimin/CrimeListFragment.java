@@ -27,7 +27,7 @@ public class CrimeListFragment extends Fragment {
     private CrimeAdapter _adapter;
 
     protected static final String TAG = "CRIME_LIST";
-    private int crimePos;
+    private Integer[] crimePos;
 
     /**
      *  start
@@ -55,13 +55,20 @@ public class CrimeListFragment extends Fragment {
     private void updateUI(){
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());//Call Instance and get ob
         List<Crime> crimes = crimeLab.getCrime();
-
         if(_adapter==null){
             _adapter = new CrimeAdapter(crimes); //Create ob by call CrimeAdapter
             _crimeRecyclerView.setAdapter(_adapter); //set adapter but I don't know when crimeRecyclerView work.
         }else{
 //            _adapter.notifyDataSetChanged();
-            _adapter.notifyItemChanged(crimePos);
+            if(crimePos != null){
+                    for(Integer pos : crimePos){
+                        _adapter.notifyItemChanged(pos);
+                        Log.d(TAG, "notify change at " + pos);
+                    }
+
+            }
+
+
         }
     }
 
@@ -82,13 +89,14 @@ public class CrimeListFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUEST_UPDATED_CRIME){
             if(resultCode == Activity.RESULT_OK){
-                crimePos = (int) data.getExtras().get("position");
+                crimePos = (Integer[]) data.getExtras().get("position");
                 Log.d(TAG, "get crimePos=" + crimePos);
             }
             //Blah blah
             Log.d(TAG,"Return form CrimeFragment ");
         }
     }
+
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView _titleTextView;
