@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -30,31 +29,38 @@ public class CrimeListFragment extends Fragment {
     protected static final String TAG = "CRIME_LIST";
     private int crimePos;
 
+    /**
+     *  start
+     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_crime_list, container,false);
-
-        _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view);
+        View v = inflater.inflate(R.layout.fragment_crime_list, container,false); //create view to get in container
+        // Inside RecyclerView,I don't know how it's work.
+        _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view); //Get RecyclerView and give v to find ID
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        /**
+            Set layoutManager .It's setter. linear is vertical
+            getActivity stay in fragment.
+         **/
 
         updateUI();
-        return v;
-
+        return v; //return view to use up to you.
     }
+
 
     /**
      * Update UI
      */
     private void updateUI(){
-        CrimeLab crimeLab = CrimeLab.getInstance();
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());//Call Instance and get ob
         List<Crime> crimes = crimeLab.getCrime();
+
         if(_adapter==null){
-            _adapter = new CrimeAdapter(crimes);
-            _crimeRecyclerView.setAdapter(_adapter);
+            _adapter = new CrimeAdapter(crimes); //Create ob by call CrimeAdapter
+            _crimeRecyclerView.setAdapter(_adapter); //set adapter but I don't know when crimeRecyclerView work.
         }else{
 //            _adapter.notifyDataSetChanged();
-
             _adapter.notifyItemChanged(crimePos);
         }
     }
@@ -97,9 +103,10 @@ public class CrimeListFragment extends Fragment {
                     itemView.findViewById(R.id.list_item_crime_title_text_view);
             _solvedCheckBox = (CheckBox)
                         itemView.findViewById(R.id.list_item_crime_solved_check_box);
-            _dateTextView=(TextView)
+            _dateTextView =(TextView)
                         itemView.findViewById(R.id.list_item_crime_date_text_view);
-            itemView.setOnClickListener(this);
+
+            itemView.setOnClickListener(this); //plus OnClickListener
 
         }
 
@@ -111,6 +118,10 @@ public class CrimeListFragment extends Fragment {
             _solvedCheckBox.setChecked(_crime.isSolved());
         }
 
+        /**
+         * CrimeHolder
+         * onclick Method
+         */
         @Override
         public void onClick(View view) {
 //            Toast.makeText(getActivity(),
@@ -118,21 +129,21 @@ public class CrimeListFragment extends Fragment {
 //                    Toast.LENGTH_SHORT)
 //                    .show();
             Log.d(TAG, "Send position ; "+ _position);
-            Intent intent = CrimeActivity.newIntent(getActivity(),_crime.getId(),_position);
-            startActivityForResult(intent,REQUEST_UPDATED_CRIME);
+            Intent intent = CrimePagerActivity.newIntent(getActivity(),_crime.getId(),_position);//Call Method newIntent and sent
+            startActivityForResult(intent,REQUEST_UPDATED_CRIME);//Call Method of Fragment class
         }
     }
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>{
         private List<Crime> _crimes;
         private int viewCreatingCount;
-        public  CrimeAdapter(List<Crime> crimes){this._crimes = crimes;}
+        public  CrimeAdapter(List<Crime> crimes){this._crimes = crimes;} //ArrayList
 
         @Override
         public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             viewCreatingCount++;
             Log.d(TAG,"Create view holder for CrimeList : creating view time = "+ viewCreatingCount);
-            LayoutInflater layoutInflater= LayoutInflater.from(getActivity());
-            View v = layoutInflater.inflate(R.layout.list_item_crime,parent,false);
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity()); // from is statics method LayoutInflater stay in getActivity
+            View v = layoutInflater.inflate(R.layout.list_item_crime,parent,false); // Draw , Create TextView 2txt
             return new CrimeHolder(v);
         }
 
@@ -140,7 +151,7 @@ public class CrimeListFragment extends Fragment {
         public void onBindViewHolder(CrimeHolder holder, int position) {
             Log.d(TAG,"Bind view holder for CrimeList : position = " + position);
             Crime crime = _crimes.get(position);
-            holder.bind(crime,position);
+            holder.bind(crime,position); // get crime object to use
         }
 
         @Override

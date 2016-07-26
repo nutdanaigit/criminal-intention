@@ -19,7 +19,8 @@ public abstract class SingleFragmentActivity extends FragmentActivity {
         Fragment f =fm.findFragmentById(R.id.fragment_container);
 
         if( f == null){
-            f = onCreateFragment();
+            f = onCreateFragment(); //CreateFragment Get Method form onCreateFragment
+            //
             fm.beginTransaction()
                     .add(R.id.fragment_container,f)
                     .commit();
