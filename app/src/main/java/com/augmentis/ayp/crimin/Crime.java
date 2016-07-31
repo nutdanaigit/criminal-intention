@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public class Crime {
     private UUID id;
-    private  String title;
+    private String title;
     private Date crimeDate;
     private boolean solved;
 

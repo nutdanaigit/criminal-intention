@@ -11,7 +11,6 @@ import java.util.UUID;
  */
 public class CrimeLab {
     List<Crime> crimeList;
-
     private static CrimeLab instance;
 
     public static CrimeLab getInstance(Context context) {
@@ -22,13 +21,15 @@ public class CrimeLab {
     }
 
     public CrimeLab() {
-        crimeList = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #" + i);
-            crime.setSolved(i % 2 == 0);
-            crimeList.add(crime);
+        if(crimeList==null){
+            crimeList = new ArrayList<>();
         }
+//        for (int i = 1; i <= 100; i++) {
+//            Crime crime = new Crime();
+//            crime.setTitle("Crime #" + i);
+//            crime.setSolved(i % 2 == 0);
+//            crimeList.add(crime);
+//        }
     }
 
     public Crime getCrimeById(UUID uuid) {
@@ -61,5 +62,9 @@ public class CrimeLab {
                 }
 //        System.out.println(crimeLab.toString());
 //        System.out.println(crimeLab.getInstance());
+    }
+
+    public void addCrime(Crime crime) {
+        crimeList.add(crime);
     }
 }

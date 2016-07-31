@@ -5,10 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -21,6 +25,7 @@ import java.util.List;
  */
 public class CrimeListFragment extends Fragment {
     private static final int REQUEST_UPDATED_CRIME = 137;
+    private static final java.lang.String SUBTITLE_VISIBLE_STATE ="SUBTITLE_VISIBLE" ;
 
     private RecyclerView _crimeRecyclerView;
 
@@ -28,6 +33,8 @@ public class CrimeListFragment extends Fragment {
 
     protected static final String TAG = "CRIME_LIST";
     private Integer[] crimePos;
+    private boolean _subtitleVisible;
+
 
     /**
      *  start
@@ -39,6 +46,11 @@ public class CrimeListFragment extends Fragment {
         // Inside RecyclerView,I don't know how it's work.
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view); //Get RecyclerView and give v to find ID
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        if(savedInstanceState!=null){
+            _subtitleVisible=savedInstanceState.getBoolean(SUBTITLE_VISIBLE_STATE);
+        }
+
         /**
             Set layoutManager .It's setter. linear is vertical
             getActivity stay in fragment.
@@ -48,6 +60,65 @@ public class CrimeListFragment extends Fragment {
         return v; //return view to use up to you.
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.crime_list_menu,menu);
+
+        MenuItem menuItem = menu.findItem(R.id.menu_item_show_subtitle);
+        if(_subtitleVisible){
+            menuItem.setIcon(R.drawable.closed_eyes);
+            menuItem.setTitle(R.string.hide_subtitle);
+        }else{
+            menuItem.setIcon(R.drawable.opened_eye);
+            menuItem.setTitle(R.string.show_subtitle);
+
+        }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_item_new_crime :
+                Crime crime = new Crime();
+                CrimeLab.getInstance(getActivity()).addCrime(crime);//TODO: AddCrime()to Crime
+                Intent intent = CrimePagerActivity.newIntent(getActivity(),crime.getId());
+                startActivity(intent);
+                return true;
+            case R.id.menu_item_show_subtitle:
+                _subtitleVisible=!_subtitleVisible;
+                getActivity().invalidateOptionsMenu();
+
+                updateSubtitle();
+                return true;
+            default: return super.onOptionsItemSelected(item);
+        }
+    }
+    public void updateSubtitle(){
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+        int crimeCount = crimeLab.getCrime().size();
+        String subtitle = getString(R.string.subtitle_format , crimeCount);
+        if(!_subtitleVisible){
+            subtitle = null;
+        }
+//        String.format("%s : %d","Hello",222);
+        AppCompatActivity appCompatActivity=(AppCompatActivity) getActivity();
+        appCompatActivity.getSupportActionBar().setSubtitle(subtitle);
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle whatever) {
+        super.onSaveInstanceState(whatever);
+        whatever.putBoolean(SUBTITLE_VISIBLE_STATE,_subtitleVisible);
+    }
 
     /**
      * Update UI
@@ -59,23 +130,21 @@ public class CrimeListFragment extends Fragment {
             _adapter = new CrimeAdapter(crimes); //Create ob by call CrimeAdapter
             _crimeRecyclerView.setAdapter(_adapter); //set adapter but I don't know when crimeRecyclerView work.
         }else{
-//            _adapter.notifyDataSetChanged();
-            if(crimePos != null){
-                    for(Integer pos : crimePos){
-                        _adapter.notifyItemChanged(pos);
-                        Log.d(TAG, "notify change at " + pos);
-                    }
+            _adapter.notifyDataSetChanged();
+//            if(crimePos != null){
+//                    for(Integer pos : crimePos){
+//                        _adapter.notifyItemChanged(pos);
+//                        Log.d(TAG, "notify change at " + pos);
+//                    }
 
-            }
+//            }
 
 
         }
+        updateSubtitle();
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+
 
 
     @Override
@@ -137,7 +206,7 @@ public class CrimeListFragment extends Fragment {
 //                    Toast.LENGTH_SHORT)
 //                    .show();
             Log.d(TAG, "Send position ; "+ _position);
-            Intent intent = CrimePagerActivity.newIntent(getActivity(),_crime.getId(),_position);//Call Method newIntent and sent
+            Intent intent = CrimePagerActivity.newIntent(getActivity(),_crime.getId());//Call Method newIntent and sent
             startActivityForResult(intent,REQUEST_UPDATED_CRIME);//Call Method of Fragment class
         }
     }
