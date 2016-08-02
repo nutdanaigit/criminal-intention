@@ -9,51 +9,22 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.augmentis.ayp.crimin.model.Crime;
+import com.augmentis.ayp.crimin.model.CrimeLab;
+
 import java.util.List;
 import java.util.UUID;
 
-public class CrimePagerActivity extends AppCompatActivity {
-
-    private ViewPager _viewPager;
-    private List<Crime> _crimes;
+public class CrimePagerActivity extends SingleFragmentActivity {
     private UUID _crimeId;
 
 
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_crime_pager);
-
-         _crimeId = (UUID) getIntent().getSerializableExtra(CRIME_ID);
-
-        _viewPager = (ViewPager) findViewById(R.id.activity_crime_pager_view_pager);
-
-        _crimes = CrimeLab.getInstance(this).getCrime();
-
-        FragmentManager fm = getSupportFragmentManager();
-
-        _viewPager.setAdapter(new FragmentPagerAdapter(fm) {
-            @Override
-            public Fragment getItem(int position) {
-                Crime crime = _crimes.get(position);
-                Fragment f = CrimeFragment.newInstance(crime.getId());
-                return f;
-            }
-
-            @Override
-            public int getCount() {
-                return _crimes.size();
-            }
-        });
-        //set position
-         int position = CrimeLab.getInstance(this).getCrimePositionById(_crimeId);
-        _viewPager.setCurrentItem(position);
-
-
+    protected Fragment onCreateFragment() {
+        _crimeId = (UUID) getIntent().getSerializableExtra(CRIME_ID);
+        return CrimeFragment.newInstance(_crimeId);
     }
-
 
     protected static final String CRIME_ID = "crimeActivity.crimeId";
 

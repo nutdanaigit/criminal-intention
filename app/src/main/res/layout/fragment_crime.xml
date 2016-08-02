@@ -52,11 +52,25 @@
             android:gravity="bottom"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+            <!--<Button-->
+                <!--android:id="@+id/delete_btn"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:text="@string/delete_btn"/>-->
+
+
             <Button
-                android:id="@+id/delete_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/delete_btn"/>
+                android:text="@string/choose_suspect"
+                android:id="@+id/crime_suspect"
+                android:layout_gravity="center_horizontal" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/send_crime_report"
+                android:id="@+id/crime_report"
+                android:layout_gravity="center_horizontal" />
         </LinearLayout>
 </LinearLayout>

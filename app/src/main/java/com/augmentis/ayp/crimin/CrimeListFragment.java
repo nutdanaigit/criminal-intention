@@ -2,6 +2,7 @@ package com.augmentis.ayp.crimin;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,7 +17,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import com.augmentis.ayp.crimin.model.Crime;
+import com.augmentis.ayp.crimin.model.CrimeLab;
 
 import java.util.List;
 
@@ -26,12 +31,9 @@ import java.util.List;
 public class CrimeListFragment extends Fragment {
     private static final int REQUEST_UPDATED_CRIME = 137;
     private static final java.lang.String SUBTITLE_VISIBLE_STATE ="SUBTITLE_VISIBLE" ;
-
-    private RecyclerView _crimeRecyclerView;
-
-    private CrimeAdapter _adapter;
-
     protected static final String TAG = "CRIME_LIST";
+    private RecyclerView _crimeRecyclerView;
+    private CrimeAdapter _adapter;
     private Integer[] crimePos;
     private boolean _subtitleVisible;
 
@@ -130,16 +132,8 @@ public class CrimeListFragment extends Fragment {
             _adapter = new CrimeAdapter(crimes); //Create ob by call CrimeAdapter
             _crimeRecyclerView.setAdapter(_adapter); //set adapter but I don't know when crimeRecyclerView work.
         }else{
+            _adapter.setCrimes(crimeLab.getCrime());
             _adapter.notifyDataSetChanged();
-//            if(crimePos != null){
-//                    for(Integer pos : crimePos){
-//                        _adapter.notifyItemChanged(pos);
-//                        Log.d(TAG, "notify change at " + pos);
-//                    }
-
-//            }
-
-
         }
         updateSubtitle();
     }
@@ -172,7 +166,9 @@ public class CrimeListFragment extends Fragment {
         public TextView _dateTextView;
         public CheckBox _solvedCheckBox;
         int _position;
-        Crime _crime;
+        private  Crime _crime;
+
+
 
         public CrimeHolder(View itemView) {
             super(itemView);
@@ -180,6 +176,14 @@ public class CrimeListFragment extends Fragment {
                     itemView.findViewById(R.id.list_item_crime_title_text_view);
             _solvedCheckBox = (CheckBox)
                         itemView.findViewById(R.id.list_item_crime_solved_check_box);
+//            _solvedCheckBox.setEnabled(false);
+            _solvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    _crime.setSolved(b);
+                    CrimeLab.getInstance(getActivity()).updateCrime(_crime);
+                }
+            });
             _dateTextView =(TextView)
                         itemView.findViewById(R.id.list_item_crime_date_text_view);
 
@@ -187,12 +191,15 @@ public class CrimeListFragment extends Fragment {
 
         }
 
+
+
         public void bind(Crime crime,int position) {
             _crime = crime;
             _position = position;
             _titleTextView.setText(_crime.getTitle());
             _dateTextView.setText(_crime.getCrimeDate().toString());
             _solvedCheckBox.setChecked(_crime.isSolved());
+
         }
 
         /**
@@ -201,19 +208,22 @@ public class CrimeListFragment extends Fragment {
          */
         @Override
         public void onClick(View view) {
-//            Toast.makeText(getActivity(),
-//                    "Press!"+_titleTextView.getText(),
-//                    Toast.LENGTH_SHORT)
-//                    .show();
             Log.d(TAG, "Send position ; "+ _position);
             Intent intent = CrimePagerActivity.newIntent(getActivity(),_crime.getId());//Call Method newIntent and sent
             startActivityForResult(intent,REQUEST_UPDATED_CRIME);//Call Method of Fragment class
         }
     }
+
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>{
         private List<Crime> _crimes;
         private int viewCreatingCount;
+
         public  CrimeAdapter(List<Crime> crimes){this._crimes = crimes;} //ArrayList
+
+
+        protected void setCrimes(List<Crime> crimes){
+            _crimes = crimes;
+        }
 
         @Override
         public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
