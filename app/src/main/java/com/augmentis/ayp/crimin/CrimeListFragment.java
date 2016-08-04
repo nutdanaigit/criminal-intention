@@ -2,7 +2,7 @@ package com.augmentis.ayp.crimin;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,11 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.augmentis.ayp.crimin.model.Crime;
 import com.augmentis.ayp.crimin.model.CrimeLab;
+import com.augmentis.ayp.crimin.model.PictureUtils;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -36,6 +39,9 @@ public class CrimeListFragment extends Fragment {
     private CrimeAdapter _adapter;
     private Integer[] crimePos;
     private boolean _subtitleVisible;
+    private TextView showToAdd;
+    private String subtitle;
+
 
 
     /**
@@ -48,6 +54,10 @@ public class CrimeListFragment extends Fragment {
         // Inside RecyclerView,I don't know how it's work.
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view); //Get RecyclerView and give v to find ID
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        showToAdd = (TextView) v.findViewById(R.id.show_txt);
+
+
+
 
         if(savedInstanceState!=null){
             _subtitleVisible=savedInstanceState.getBoolean(SUBTITLE_VISIBLE_STATE);
@@ -103,15 +113,22 @@ public class CrimeListFragment extends Fragment {
             default: return super.onOptionsItemSelected(item);
         }
     }
+
     public void updateSubtitle(){
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         int crimeCount = crimeLab.getCrime().size();
-        String subtitle = getString(R.string.subtitle_format , crimeCount);
+        //plurals
+//        String subtitle = getString(R.string.subtitle_format , crimeCount);
+            subtitle = getResources().getQuantityString(R.plurals.subtitle_format, crimeCount, crimeCount);
+
+        if(crimeCount == 0){
+            subtitle = "0 Crime";
+        }
         if(!_subtitleVisible){
             subtitle = null;
         }
 //        String.format("%s : %d","Hello",222);
-        AppCompatActivity appCompatActivity=(AppCompatActivity) getActivity();
+        AppCompatActivity appCompatActivity= (AppCompatActivity) getActivity();
         appCompatActivity.getSupportActionBar().setSubtitle(subtitle);
     }
 
@@ -131,10 +148,18 @@ public class CrimeListFragment extends Fragment {
         if(_adapter==null){
             _adapter = new CrimeAdapter(crimes); //Create ob by call CrimeAdapter
             _crimeRecyclerView.setAdapter(_adapter); //set adapter but I don't know when crimeRecyclerView work.
+
         }else{
             _adapter.setCrimes(crimeLab.getCrime());
             _adapter.notifyDataSetChanged();
         }
+
+        if(crimes.isEmpty()){
+            showToAdd.setVisibility(View.VISIBLE);
+        }else{
+            showToAdd.setVisibility(View.GONE);
+        }
+
         updateSubtitle();
     }
 
@@ -167,7 +192,8 @@ public class CrimeListFragment extends Fragment {
         public CheckBox _solvedCheckBox;
         int _position;
         private  Crime _crime;
-
+        private ImageView imageView;
+        private File fileImage;
 
 
         public CrimeHolder(View itemView) {
@@ -186,12 +212,20 @@ public class CrimeListFragment extends Fragment {
             });
             _dateTextView =(TextView)
                         itemView.findViewById(R.id.list_item_crime_date_text_view);
+            imageView = (ImageView) itemView.findViewById(R.id.image_list_view);
 
             itemView.setOnClickListener(this); //plus OnClickListener
 
         }
 
-
+        public void updateImage(){
+            if(fileImage == null||!fileImage.exists()){
+                imageView.setImageDrawable(null);
+            }else{
+                Bitmap bitmap = PictureUtils.getScaledBitmap(fileImage.getPath(),getActivity());
+                imageView.setImageBitmap(bitmap);
+            }
+        }
 
         public void bind(Crime crime,int position) {
             _crime = crime;
@@ -199,7 +233,8 @@ public class CrimeListFragment extends Fragment {
             _titleTextView.setText(_crime.getTitle());
             _dateTextView.setText(_crime.getCrimeDate().toString());
             _solvedCheckBox.setChecked(_crime.isSolved());
-
+            fileImage = CrimeLab.getInstance(getActivity()).getPhotoFile(_crime);
+            updateImage();
         }
 
         /**
@@ -246,5 +281,6 @@ public class CrimeListFragment extends Fragment {
             return _crimes.size();
         }
     }
+
 
 }

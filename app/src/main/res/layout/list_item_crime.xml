@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+
+<android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,9 +9,14 @@
     android:paddingRight="4dp"
     android:paddingLeft="4dp"
     android:paddingBottom="10dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
     style="?android:listSeparatorTextViewStyle">
 
-
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <CheckBox
         android:id="@+id/list_item_crime_solved_check_box"
@@ -19,25 +25,35 @@
         android:layout_alignParentLeft="true"
         android:padding="10dp" />
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/list_item_crime_title_text_view"
         android:textStyle="bold"
         android:padding="6dp"
+        android:layout_toLeftOf="@+id/image_list_view"
         android:layout_toRightOf="@+id/list_item_crime_solved_check_box"
         tools:text="Crime title"
         android:textSize="20dp"
         />
 
-
+<ImageView
+    android:layout_centerVertical="true"
+    android:id="@+id/image_list_view"
+    android:layout_width="80dp"
+    android:layout_height="80dp"
+    android:layout_alignParentRight="true"
+    android:scaleType="centerInside"
+    android:background="@android:color/darker_gray"
+    android:cropToPadding="true" />
 
     <TextView
         android:id="@+id/list_item_crime_date_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/list_item_crime_solved_check_box"
         android:layout_below="@+id/list_item_crime_title_text_view"
         android:padding="10dp"
         tools:text="Crime date"/>
-
 </RelativeLayout>
+
+</android.support.v7.widget.CardView>

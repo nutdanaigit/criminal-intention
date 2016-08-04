@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CriminalIntention</string>
     <string name="crime_title_hint">Enter a title of crime</string>
-    <string name="crime_title_label">Date</string>
+    <string name="crime_title_label">Title</string>
     <string name="crime_detail_label">Detail</string>
     <string name="crime_solved_label">Solved</string>
     <string name="date_picker_title">Pick Date</string>
@@ -9,10 +9,27 @@
     <string name="time_btn">Choose Time</string>
     <string name="new_crime">New_crime</string>
     <string name="show_subtitle">Show SubTitle</string>
-    <string name="subtitle_format"> %d Crimes(s)</string>
+    <string name="title_dialog">Show Image</string>
+
+    <plurals name="subtitle_format">
+        <item quantity="one"> %d Crime </item>
+        <item quantity="other"> %d Crimes</item>
+    </plurals>
     <string name="hide_subtitle">Hide subtitle</string>
     <string name="delete_btn">Delete</string>
     <string name="delete_crime">Delete</string>
     <string name="choose_suspect">Choose Suspect</string>
     <string name="send_crime_report">Send Crime Reprot</string>
+
+    <!--Report-->
+    <string name="crime_report_solved" >The case is solved</string>
+    <string name="crime_report_unsolved" >The case is not solved</string>
+    <string name="crime_report_no_suspect" >There is no suspect.</string>
+    <string name="crime_report_with_suspect" >The suspect is %s.</string>
+    <string name="crime_report" >%1$s!
+        The crime was discovered on %2$s. %3$s, and %4$s
+    </string>
+    <string name="crime_report_subject" >CriminalIntent Crime Report</string>
+    <string name="send_report" >Send crime report</string>
+
 </resources>

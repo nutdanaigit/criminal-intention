@@ -39,7 +39,9 @@ public class Crime {
     public void setCrimeDate(Date crimeDate) {this.crimeDate = crimeDate;}
     public void setSolved(boolean solved) {this.solved = solved;}
     public void setSuspect(String suspect) {this.suspect = suspect;}
-
+    public String getPhotoFilename(){
+        return "IMG_" + getId().toString() + ".jpg";
+    }
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
