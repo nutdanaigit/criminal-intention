@@ -3,6 +3,7 @@ package com.augmentis.ayp.crimin;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -53,6 +54,7 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 22;
     private static final int REQUEST_DATE2 = 23;
     private static final int REQUEST_CONTACT_SUSPECT = 25;
+
     private Crime crime;
     private EditText editText;
     private Button crimeDateButton;
@@ -70,7 +72,7 @@ public class CrimeFragment extends Fragment {
     private File photoFile;
     private static final int REQUEST_CODE_DIALOG = 5543;
     private static final String REQUEST_STRING_DIALOG = "Hello";
-
+    private Callbacks callBacks;
 
 
 
@@ -86,16 +88,43 @@ public class CrimeFragment extends Fragment {
         return crimeFragment;
     }
 
+    public UUID getCrimeId() {
+        if (this.crime != null) {
+            return  this.crime.getId();
+        }
+        return null;
+    }
+
+    //CallBack
+    public interface Callbacks{
+        void onCrimeUpdated(Crime crime);
+        void onCrimeDeleted();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callBacks = null;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        callBacks = (Callbacks) context;
+    }
+    private void reloadCrieFromDB(){
+
+        UUID crimeId = (UUID) getArguments().getSerializable(CRIME_ID);
+        crime = CrimeLab.getInstance(getActivity()).getCrimeById(crimeId);
+
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-
-        UUID crimeId = (UUID) getArguments().getSerializable(CRIME_ID);
-        crime = CrimeLab.getInstance(getActivity()).getCrimeById(crimeId);
-
+        reloadCrieFromDB();
         Log.d(CrimeListFragment.TAG, "crime.getTitle()=" + crime.getTitle());
         photoFile = CrimeLab.getInstance(getActivity()).getPhotoFile(crime);
     }
@@ -104,6 +133,7 @@ public class CrimeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crime, container, false);
+//        CrimeLab.getInstance(getActivity()).getCrime();
         editText = (EditText) v.findViewById(R.id.crime_title);
         editText.setText(crime.getTitle());
         editText.addTextChangedListener(new TextWatcher() {
@@ -115,6 +145,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int after) {
                 crime.setTitle(s.toString());
+                updateCrime();
             }
 
             @Override
@@ -143,6 +174,7 @@ public class CrimeFragment extends Fragment {
                 FragmentManager fm = getFragmentManager();
                 DatePickerFragment dialogFragment = DatePickerFragment.newInstance(crime.getCrimeDate());
                 dialogFragment.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+
                 dialogFragment.show(fm, DILOG_DATE);
             }
         });
@@ -153,8 +185,11 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 //                crime.isSolved();
-                crime.setSolved(isChecked);
-                Log.d(CrimeListFragment.TAG, "Crime" + crime.toString());
+                if(buttonView.isPressed()) {
+                    crime.setSolved(isChecked);
+                    updateCrime();
+                    Log.d(CrimeListFragment.TAG, "Crime" + crime.toString());
+                }
             }
         });
 
@@ -276,6 +311,7 @@ public class CrimeFragment extends Fragment {
             //set
             crime.setCrimeDate(date);
             crimeDateButton.setText(getFormattedDate(crime.getCrimeDate()));
+            updateCrime();
         }
         if (requestCode == REQUEST_DATE2) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_DATE2);
@@ -283,6 +319,7 @@ public class CrimeFragment extends Fragment {
             //set
             crime.setCrimeDate(date);
             crimeTimeButton.setText(getFormattedtime(crime.getCrimeDate()));
+            updateCrime();
         }
 
         if (requestCode == REQUEST_CONTACT_SUSPECT) {
@@ -309,6 +346,7 @@ public class CrimeFragment extends Fragment {
 //                    String suspect = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                     crime.setSuspect(suspect);
                     crimeSuspectButton.setText(suspect);
+                    updateCrime();
                 } finally {
                     c.close();
                 }
@@ -324,8 +362,6 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-
-        CrimeLab.getInstance(getActivity()).updateCrime(crime);  // Update crime in Db
     }
 
     @Override
@@ -340,7 +376,7 @@ public class CrimeFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.menu_item_delete_crime:
                 CrimeLab.getInstance(getActivity()).deleteCrime(crime.getId());
-                getActivity().finish();
+                callBacks.onCrimeDeleted();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -391,11 +427,19 @@ public class CrimeFragment extends Fragment {
 
         }
     }
+    public void updateUI(){
+        reloadCrieFromDB();
+        crimeSolvedCheckbox.setChecked(crime.isSolved());
+    }
 
     private void callSuspect() {
         Log.d("pearll", "" + phoneNumber);
         Intent c = new Intent(Intent.ACTION_CALL);
         c.setData(Uri.parse("tel:" + phoneNumber));
         startActivity(c);
+    }
+    private void updateCrime(){
+        CrimeLab.getInstance(getActivity()).updateCrime(crime);
+        callBacks.onCrimeUpdated(crime);
     }
 }

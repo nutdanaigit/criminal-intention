@@ -1,6 +1,7 @@
 package com.augmentis.ayp.crimin;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -41,8 +42,24 @@ public class CrimeListFragment extends Fragment {
     private boolean _subtitleVisible;
     private TextView showToAdd;
     private String subtitle;
+    private Callbacks callbacks;
+    private Crime crime;
 
+    public interface Callbacks{
+        void onCrimeSelected(Crime crime);
+    }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        callbacks= (Callbacks) context;  //activity
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callbacks = null;
+    }
 
     /**
      *  start
@@ -52,9 +69,14 @@ public class CrimeListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crime_list, container,false); //create view to get in container
         // Inside RecyclerView,I don't know how it's work.
+        if(!CrimeLab.getInstance(getActivity()).getCrime().isEmpty()) {
+            callbacks.onCrimeSelected(CrimeLab.getInstance(getActivity()).getCrime().get(0));
+        }
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view); //Get RecyclerView and give v to find ID
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         showToAdd = (TextView) v.findViewById(R.id.show_txt);
+
+
 
 
 
@@ -91,7 +113,6 @@ public class CrimeListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setHasOptionsMenu(true);
     }
 
@@ -101,8 +122,9 @@ public class CrimeListFragment extends Fragment {
             case R.id.menu_item_new_crime :
                 Crime crime = new Crime();
                 CrimeLab.getInstance(getActivity()).addCrime(crime);//TODO: AddCrime()to Crime
-                Intent intent = CrimePagerActivity.newIntent(getActivity(),crime.getId());
-                startActivity(intent);
+                //support tablet
+                updateUI();
+                callbacks.onCrimeSelected(crime);
                 return true;
             case R.id.menu_item_show_subtitle:
                 _subtitleVisible=!_subtitleVisible;
@@ -142,7 +164,7 @@ public class CrimeListFragment extends Fragment {
     /**
      * Update UI
      */
-    private void updateUI(){
+    public void updateUI(){
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());//Call Instance and get ob
         List<Crime> crimes = crimeLab.getCrime();
         if(_adapter==null){
@@ -170,7 +192,7 @@ public class CrimeListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG,"Resume list");
-        updateUI();
+        updateUI();  //refresh List
     }
 
     @Override
@@ -205,18 +227,21 @@ public class CrimeListFragment extends Fragment {
 //            _solvedCheckBox.setEnabled(false);
             _solvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    _crime.setSolved(b);
-                    CrimeLab.getInstance(getActivity()).updateCrime(_crime);
+                public void onCheckedChanged(CompoundButton buttonView, boolean b) {
+                    if(buttonView.isPressed()) {
+                        _crime.setSolved(b);
+                        CrimeLab.getInstance(getActivity()).updateCrime(_crime);
+                        callbacks.onCrimeSelected(_crime);
+                    }
                 }
             });
             _dateTextView =(TextView)
                         itemView.findViewById(R.id.list_item_crime_date_text_view);
             imageView = (ImageView) itemView.findViewById(R.id.image_list_view);
-
             itemView.setOnClickListener(this); //plus OnClickListener
 
         }
+
 
         public void updateImage(){
             if(fileImage == null||!fileImage.exists()){
@@ -234,6 +259,7 @@ public class CrimeListFragment extends Fragment {
             _dateTextView.setText(_crime.getCrimeDate().toString());
             _solvedCheckBox.setChecked(_crime.isSolved());
             fileImage = CrimeLab.getInstance(getActivity()).getPhotoFile(_crime);
+
             updateImage();
         }
 
@@ -244,8 +270,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View view) {
             Log.d(TAG, "Send position ; "+ _position);
-            Intent intent = CrimePagerActivity.newIntent(getActivity(),_crime.getId());//Call Method newIntent and sent
-            startActivityForResult(intent,REQUEST_UPDATED_CRIME);//Call Method of Fragment class
+            callbacks.onCrimeSelected(_crime);
         }
     }
 
