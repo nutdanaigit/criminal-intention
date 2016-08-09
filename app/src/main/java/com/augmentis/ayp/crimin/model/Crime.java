@@ -18,7 +18,6 @@ public class Crime {
     private String suspect;
 
 
-
     public Crime(){
         this(UUID.randomUUID());
     }

@@ -64,6 +64,7 @@ public class CrimeFragment extends Fragment {
     //    private Button crimeDeleteButton;
     private CheckBox crimeSolvedCheckbox;
     private Button crimeReportButton;
+    private int position;
     private String phoneNumber;
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 12;
     private static final int REQUEST_CAPTURE_PHOTO = 875;
@@ -82,7 +83,6 @@ public class CrimeFragment extends Fragment {
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
         args.putSerializable(CRIME_ID, crimeId);
-
         CrimeFragment crimeFragment = new CrimeFragment();
         crimeFragment.setArguments(args);
         return crimeFragment;
@@ -112,7 +112,7 @@ public class CrimeFragment extends Fragment {
         super.onAttach(context);
         callBacks = (Callbacks) context;
     }
-    private void reloadCrieFromDB(){
+    private void reloadCrimeFromDB(){
 
         UUID crimeId = (UUID) getArguments().getSerializable(CRIME_ID);
         crime = CrimeLab.getInstance(getActivity()).getCrimeById(crimeId);
@@ -124,7 +124,7 @@ public class CrimeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        reloadCrieFromDB();
+        reloadCrimeFromDB();
         Log.d(CrimeListFragment.TAG, "crime.getTitle()=" + crime.getTitle());
         photoFile = CrimeLab.getInstance(getActivity()).getPhotoFile(crime);
     }
@@ -428,7 +428,7 @@ public class CrimeFragment extends Fragment {
         }
     }
     public void updateUI(){
-        reloadCrieFromDB();
+        reloadCrimeFromDB();
         crimeSolvedCheckbox.setChecked(crime.isSolved());
     }
 

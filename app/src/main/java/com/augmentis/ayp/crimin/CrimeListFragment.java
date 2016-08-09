@@ -45,8 +45,11 @@ public class CrimeListFragment extends Fragment {
     private Callbacks callbacks;
     private Crime crime;
 
+
+
     public interface Callbacks{
         void onCrimeSelected(Crime crime);
+        void onOpenSelectFirst();
     }
 
     @Override
@@ -69,17 +72,13 @@ public class CrimeListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crime_list, container,false); //create view to get in container
         // Inside RecyclerView,I don't know how it's work.
-        if(!CrimeLab.getInstance(getActivity()).getCrime().isEmpty()) {
-            callbacks.onCrimeSelected(CrimeLab.getInstance(getActivity()).getCrime().get(0));
-        }
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+
+//        callbacks.onCrimeSelected(CrimeLab.getInstance(getActivity()).getCrime().get(0));
+//        checkUpdate();
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view); //Get RecyclerView and give v to find ID
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         showToAdd = (TextView) v.findViewById(R.id.show_txt);
-
-
-
-
-
 
         if(savedInstanceState!=null){
             _subtitleVisible=savedInstanceState.getBoolean(SUBTITLE_VISIBLE_STATE);
@@ -89,10 +88,11 @@ public class CrimeListFragment extends Fragment {
             Set layoutManager .It's setter. linear is vertical
             getActivity stay in fragment.
          **/
-
         updateUI();
         return v; //return view to use up to you.
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -181,7 +181,7 @@ public class CrimeListFragment extends Fragment {
         }else{
             showToAdd.setVisibility(View.GONE);
         }
-
+            callbacks.onOpenSelectFirst();
         updateSubtitle();
     }
 
@@ -208,12 +208,13 @@ public class CrimeListFragment extends Fragment {
     }
 
 
-    private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView _titleTextView;
         public TextView _dateTextView;
         public CheckBox _solvedCheckBox;
-        int _position;
-        private  Crime _crime;
+        private int positionTest;
+        private int _position;
+        private Crime _crime;
         private ImageView imageView;
         private File fileImage;
 
@@ -223,45 +224,45 @@ public class CrimeListFragment extends Fragment {
             _titleTextView = (TextView)
                     itemView.findViewById(R.id.list_item_crime_title_text_view);
             _solvedCheckBox = (CheckBox)
-                        itemView.findViewById(R.id.list_item_crime_solved_check_box);
+                    itemView.findViewById(R.id.list_item_crime_solved_check_box);
 //            _solvedCheckBox.setEnabled(false);
             _solvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean b) {
-                    if(buttonView.isPressed()) {
+                    if (buttonView.isPressed()) {
                         _crime.setSolved(b);
                         CrimeLab.getInstance(getActivity()).updateCrime(_crime);
                         callbacks.onCrimeSelected(_crime);
                     }
                 }
             });
-            _dateTextView =(TextView)
-                        itemView.findViewById(R.id.list_item_crime_date_text_view);
+            _dateTextView = (TextView)
+                    itemView.findViewById(R.id.list_item_crime_date_text_view);
             imageView = (ImageView) itemView.findViewById(R.id.image_list_view);
             itemView.setOnClickListener(this); //plus OnClickListener
 
         }
 
 
-        public void updateImage(){
-            if(fileImage == null||!fileImage.exists()){
+        public void updateImage() {
+            if (fileImage == null || !fileImage.exists()) {
                 imageView.setImageDrawable(null);
-            }else{
-                Bitmap bitmap = PictureUtils.getScaledBitmap(fileImage.getPath(),getActivity());
+            } else {
+                Bitmap bitmap = PictureUtils.getScaledBitmap(fileImage.getPath(), getActivity());
                 imageView.setImageBitmap(bitmap);
             }
         }
 
-        public void bind(Crime crime,int position) {
+        public void bind(Crime crime, int position) {
             _crime = crime;
             _position = position;
             _titleTextView.setText(_crime.getTitle());
             _dateTextView.setText(_crime.getCrimeDate().toString());
             _solvedCheckBox.setChecked(_crime.isSolved());
             fileImage = CrimeLab.getInstance(getActivity()).getPhotoFile(_crime);
-
             updateImage();
         }
+
 
         /**
          * CrimeHolder
@@ -269,12 +270,17 @@ public class CrimeListFragment extends Fragment {
          */
         @Override
         public void onClick(View view) {
-            Log.d(TAG, "Send position ; "+ _position);
+            Log.d(TAG, "Send position ; " + _position);
             callbacks.onCrimeSelected(_crime);
         }
+
+
+
+
+
     }
 
-    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>{
+    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
         private List<Crime> _crimes;
         private int viewCreatingCount;
 
@@ -299,13 +305,54 @@ public class CrimeListFragment extends Fragment {
             Log.d(TAG,"Bind view holder for CrimeList : position = " + position);
             Crime crime = _crimes.get(position);
             holder.bind(crime,position); // get crime object to use
+
         }
 
         @Override
         public int getItemCount() {
             return _crimes.size();
         }
+
     }
 
+
+    public void checkUpdate(int temp){
+    CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+        Log.d(TAG, "Send position ; " + temp);
+        if (!crimeLab.getCrime().isEmpty()) {
+            callbacks.onCrimeSelected(crimeLab.getCrime().get(temp));
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //        if(!crimeLab.getCrime().isEmpty()) {
+//                callbacks.onCrimeSelected(crimeLab.getCrime().get(0));
+//        }
+
+
+
+
+
+//    if (positionTest == 0) {
+//                } else if (positionTest == crimeLab.getCrime().size()) {
+//                    callbacks.onCrimeSelected(crimeLab.getCrime().get(positionTest + 1));
+//                    Log.d("pearl ", "  " + positionTest);
+//                } else {
+//                    callbacks.onCrimeSelected(crimeLab.getCrime().get(positionTest - 1));
+//                    Log.d("pearl ", "  " + positionTest);
+//                }
 
 }

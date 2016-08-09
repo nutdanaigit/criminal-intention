@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class CrimePagerActivity extends SingleFragmentActivity implements CrimeFragment.Callbacks {
+//    private int _position;
     @Override
     protected int getLayoutResId() {
         return R.layout.activity_single_fragment;
@@ -27,8 +28,10 @@ public class CrimePagerActivity extends SingleFragmentActivity implements CrimeF
 
     @Override
     protected Fragment onCreateFragment() {
+
         _crimeId = (UUID) getIntent().getSerializableExtra(CRIME_ID);
         return CrimeFragment.newInstance(_crimeId);
+
     }
 
     protected static final String CRIME_ID = "crimeActivity.crimeId";
@@ -46,6 +49,6 @@ public class CrimePagerActivity extends SingleFragmentActivity implements CrimeF
 
     @Override
     public void onCrimeDeleted() {
-        //TODO Wait
+        finish();
     }
 }
